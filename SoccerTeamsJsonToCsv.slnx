@@ -2,6 +2,7 @@
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
     <File Path="README.md" />
+    <File Path="sample_clubes.jsonl" />
   </Folder>
-  <Project Path="SoccerTeamsJsonToCsv/SoccerTeamsJsonToCsv.csproj" />
+  <Project Path="SoccerTeamsJsonToCsv.csproj" />
 </Solution>
