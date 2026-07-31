@@ -6,6 +6,18 @@ string jsonlFilePath = @"C:\Users\renan\Programacao\TesteTecnico\SoccerTeamsJson
 string clubsCsvFilePath = @"C:\Users\renan\Programacao\TesteTecnico\SoccerTeamsJsonToCsv\OutputCsv\clubs.csv";
 string playersCsvFilePath = @"C:\Users\renan\Programacao\TesteTecnico\SoccerTeamsJsonToCsv\OutputCsv\players.csv";
 
-JsonlToCsvConverterprivate.ProcessJsonStreamAsync(jsonlFilePath, clubsCsvFilePath, playersCsvFilePath).GetAwaiter().GetResult();
+try
+{
+    List<string> championships = new() { "SERIE a", "SERIE b" };
 
-Console.WriteLine("Processamento concluído.");
+    championships = championships.Select(p => p.ToUpper()).ToList();
+    JsonlToCsvConverterprivate.ProcessJsonStreamAsync(jsonlFilePath, clubsCsvFilePath, playersCsvFilePath, championships).GetAwaiter().GetResult();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Ocorreu um erro: {ex.Message}");
+}
+finally
+{
+    Console.WriteLine("Processamento finalizado.");
+}   
