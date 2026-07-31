@@ -22,7 +22,7 @@ Foi criada e testada utilizando **.NET 10.0** e **C# 14.0**.
 A aplicação aceita duas entradas, sendo 1 obrigatória.
 
 - **Caminho do arquivo JSONL** *(obrigatório)*: É o local do arquivo JSONL que será usado como fonte de dados.
-Caso não seja fornecido, a aplicação irá utilizar um arquivo padrão de testes que está no repositório.
+Caso não seja fornecido, a aplicação irá utilizar um arquivo padrão de testes que está no repositório. Será validado se o arquivo existe e se a extensão está correta.
 
 - **Campeonatos para filtro** *(opcional)*: 
 Este parâmetro pode ser usado para filtrar clubes de determinados campeonatos nas saídas CSV. 
