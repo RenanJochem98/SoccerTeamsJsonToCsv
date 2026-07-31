@@ -3,7 +3,33 @@
 {"club_id":"SFC","name":"Santos Futebol Clube","championship":"SERIE B","founding_date":"1912-04-14","city":"Santos","state":"SP","country":"Brasil","stadium":"Vila Belmiro","president":"Marcelo Teixeira","nickname":null,"colors":["preto","branco"],"titles":8,"players":[{"player_id":"SFC-11","name":"Guilherme","age":23,"goals":9,"debut_date":"2023-02-11","position":"Atacante","shirt_number":11,"nationality":"Brasil","market_value":6000000},{"player_id":"SFC-5","name":"João Schmidt","age":31,"goals":2,"debut_date":"2023-01-15","position":"Volante","shirt_number":5,"nationality":"Brasil","market_value":3000000}]}
 {"club_id":"CRU","name":"Cruzeiro Esporte Clube","championship":"SERIE A","founding_date":"1921-01-02","city":"Belo Horizonte","state":"MG","country":"Brasil","stadium":"Mineirão","president":"Pedro Lourenço, Filho","nickname":"Raposa","colors":["azul","branco"],"titles":4,"players":[{"player_id":"CRU-10","name":"Matheus Pereira","age":28,"goals":11,"debut_date":"2024-01-05","position":"Meia","shirt_number":10,"nationality":"Brasil","market_value":9000000}]}
 {"club_id":"AVA","name":"Avaí Futebol Clube","championship":"SERIE B","founding_date":"1923-09-01","city":"Florianópolis","state":"SC","country":"Brasil","stadium":"Ressacada","president":"Júlio Heerdt","nickname":"Leão da Ilha","colors":["azul","branco"],"titles":0,"players":[]}
-{"club_id":"NAC","name":"Nacional Atlético Clube","championship":"SEM CAMPEONATO","founding_date":"1919-06-04","city":"São Paulo","state":"SP","country":"Brasil","stadium":"Nicolau Alayon","president":"Antônio Carlos","nickname":"Naça","colors":["azul","branco","vermelho"],"titles":0,"players":[]}
+{
+  "club_id": "NAC",
+  "name": "Nacional Atlético Clube",
+  "championship": "SEM CAMPEONATO",
+  "founding_date": "1919-06-04",
+  "city": "São Paulo",
+  "state": "SP",
+  "country": "Brasil",
+  "stadium": "Nicolau Alayon",
+  "president": "Antônio Carlos",
+  "nickname": "Naça",
+  "colors": [ "azul", "branco", "vermelho" ],
+  "titles": 0,
+  "players": [
+    {
+      "player_id": "NAC-5",
+      "name": "Teste Nacional",
+      "age": 31,
+      "goals": 2,
+      "debut_date": "2023-01-15",
+      "position": "Volante",
+      "shirt_number": 5,
+      "nationality": "Brasil",
+      "market_value": 3000000
+    }
+  ]
+}
 {
   "club_id": "FLU",
   "name": "Fluminense",
