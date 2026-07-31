@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace SoccerTeamsJsonToCsv;
 
-internal class JsonlToCsvConverterprivate
+internal class JsonlToCsvConverter
 {
     const int BufferSize = 64 * 1024; // Buffer de 64KB para leitura
 
