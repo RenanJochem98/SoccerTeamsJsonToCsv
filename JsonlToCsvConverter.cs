@@ -7,7 +7,7 @@ internal class JsonlToCsvConverterprivate
 {
     const int BufferSize = 64 * 1024; // Buffer de 64KB para leitura
 
-    public static async Task ProcessJsonStreamAsync(string inputJsonlPath, string csvPath1, string csvPath2)
+    public static async Task ProcessJsonStreamAsync(string inputJsonlPath, string csvPath1, string csvPath2, IReadOnlyList<string> championshipsFilter)
     {
         // 1. Configurar Streams com FileOptions.SequentialScan para o SO otimizar o I/O
         await using var inputStream = new FileStream(
@@ -22,8 +22,8 @@ internal class JsonlToCsvConverterprivate
         await using var writer2 = new StreamWriter(csvPath2, append: false, Encoding.UTF8, bufferSize: BufferSize);
 
         // Escrever cabeçalhos dos CSVs
-        await writer1.WriteLineAsync("Id do Clube,Nome,Campeonato,Data de Fundação,Cidade,Estado,País,Estádio,Presidente,Apelido,Cores");
-        await writer2.WriteLineAsync("Id do Clube,Id do Jogador,Nome,Idade,Gols,Data de Estreia,Posição,Número da Camisa");
+        await writer1.WriteLineAsync("Id do Clube,Nome,Campeonato,Data de Fundação,Cidade,Estado,País,Estádio,Presidente,Apelido,Cores,");
+        await writer2.WriteLineAsync("Id do Clube,Id do Jogador,Nome,Idade,Gols,Data de Estreia,Posição,Número da Camisa,");
 
         byte[] buffer = new byte[BufferSize];
         int bytesRead = 0;
@@ -51,7 +51,7 @@ internal class JsonlToCsvConverterprivate
                     // Transforma o fragmento do objeto atual em um JsonDocument para extração rápida
                     using (var doc = JsonDocument.ParseValue(ref reader))
                     {
-                        ProcessAndWriteObject(doc.RootElement, writer1, writer2);
+                        ProcessAndWriteObject(doc.RootElement, writer1, writer2, championshipsFilter);
                     }
                 }
 
@@ -75,57 +75,51 @@ internal class JsonlToCsvConverterprivate
     }
 
     
-    private static void ProcessAndWriteObject(JsonElement root, StreamWriter writerClubes, StreamWriter writerJogadores)
+    private static void ProcessAndWriteObject(JsonElement root, StreamWriter writerClubes, StreamWriter writerJogadores, IReadOnlyList<string> championshipsFilter)
     {
-        // -------------------------------------------------------------
-        // 1. Extração dos Dados do Clube (CSV 1)
-        // -------------------------------------------------------------
-        string clubId = root.GetPropertyOrEmpty("club_id");
-        string name = root.GetPropertyOrEmpty("name");
         string championship = root.GetPropertyOrEmpty("championship");
-        string foundingDate = root.GetDateTimePropertyOrEmpty("founding_date");
-        string city = root.GetPropertyOrEmpty("city");
-        string state = root.GetPropertyOrEmpty("state");
-        string country = root.GetPropertyOrEmpty("country");
-        string stadium = root.GetPropertyOrEmpty("stadium");
-        string president = root.GetPropertyOrEmpty("president");
-        string nickname = root.GetPropertyOrEmpty("nickname");
-        int titles = root.TryGetProperty("titles", out var titlesProp) ? titlesProp.GetInt32() : 0;
 
-        // Trata o array de cores simples ["preto", "branco"] concatenando em uma única string
-        string colorsFormatted = "";
-        if (root.TryGetProperty("colors", out var colorsProp) && colorsProp.ValueKind == JsonValueKind.Array)
+        if (championshipsFilter.Contains(championship.ToUpper()))
         {
-            var colorsList = new List<string>();
-            foreach (var colorElement in colorsProp.EnumerateArray())
+            string clubId = root.GetPropertyOrEmpty("club_id");
+            string name = root.GetPropertyOrEmpty("name");
+
+            string foundingDate = root.GetDateTimePropertyOrEmpty("founding_date");
+            string city = root.GetPropertyOrEmpty("city");
+            string state = root.GetPropertyOrEmpty("state");
+            string country = root.GetPropertyOrEmpty("country");
+            string stadium = root.GetPropertyOrEmpty("stadium");
+            string president = root.GetPropertyOrEmpty("president");
+            string nickname = root.GetPropertyOrEmpty("nickname");
+
+            string colorsFormatted = "";
+            if (root.TryGetProperty("colors", out var colorsProp) && colorsProp.ValueKind == JsonValueKind.Array)
             {
-                colorsList.Add(colorElement.GetString() ?? "");
+                var colorsList = new List<string>();
+                foreach (var colorElement in colorsProp.EnumerateArray())
+                {
+                    colorsList.Add(colorElement.GetString() ?? "");
+                }
+                colorsFormatted = string.Join("|", colorsList);
             }
-            colorsFormatted = string.Join("|", colorsList);
-        }
 
-        // Grava a linha do Clube
-        writerClubes.WriteLine($"{clubId},{EscapeCsv(name)},{EscapeCsv(championship)},{foundingDate},{EscapeCsv(city)},{state},{EscapeCsv(country)},{EscapeCsv(stadium)},{EscapeCsv(president)},{EscapeCsv(nickname)},{EscapeCsv(colorsFormatted)},{titles},");
+            writerClubes.WriteLine($"{clubId},{EscapeCsv(name)},{EscapeCsv(championship)},{foundingDate},{EscapeCsv(city)},{state},{EscapeCsv(country)},{EscapeCsv(stadium)},{EscapeCsv(president)},{EscapeCsv(nickname)},{EscapeCsv(colorsFormatted)},");
 
-        // -------------------------------------------------------------
-        // 2. Extração dos Jogadores do Clube (CSV 2)
-        // -------------------------------------------------------------
-        if (root.TryGetProperty("players", out var playersProp) && playersProp.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var player in playersProp.EnumerateArray())
+            if (root.TryGetProperty("players", out var playersProp) && playersProp.ValueKind == JsonValueKind.Array)
             {
-                string playerId = player.GetPropertyOrEmpty("player_id");
-                string playerName = player.GetPropertyOrEmpty("name");
-                int age = player.TryGetProperty("age", out var ageProp) ? ageProp.GetInt32() : 0;
-                int goals = player.TryGetProperty("goals", out var goalsProp) ? goalsProp.GetInt32() : 0;
-                string debutDate = player.GetDateTimePropertyOrEmpty("debut_date");
-                string position = player.GetPropertyOrEmpty("position");
-                int shirtNumber = player.TryGetProperty("shirt_number", out var shirtProp) ? shirtProp.GetInt32() : 0;
-                string nationality = player.GetPropertyOrEmpty("nationality");
-                decimal marketValue = player.TryGetProperty("market_value", out var valProp) ? valProp.GetDecimal() : 0m;
+                foreach (var player in playersProp.EnumerateArray())
+                {
+                    string playerId = player.GetPropertyOrEmpty("player_id");
+                    string playerName = player.GetPropertyOrEmpty("name");
+                    int age = player.TryGetProperty("age", out var ageProp) ? ageProp.GetInt32() : 0;
+                    int goals = player.TryGetProperty("goals", out var goalsProp) ? goalsProp.GetInt32() : 0;
+                    string debutDate = player.GetDateTimePropertyOrEmpty("debut_date");
+                    string position = player.GetPropertyOrEmpty("position");
+                    int shirtNumber = player.TryGetProperty("shirt_number", out var shirtProp) ? shirtProp.GetInt32() : 0;
 
-                // Grava o jogador no CSV relacionando com o club_id
-                writerJogadores.WriteLine($"{clubId},{playerId},{EscapeCsv(playerName)},{age},{goals},{debutDate},{EscapeCsv(position)},{shirtNumber},{EscapeCsv(nationality)},{marketValue},");
+                    // Grava o jogador no CSV relacionando com o club_id
+                    writerJogadores.WriteLine($"{clubId},{playerId},{EscapeCsv(playerName)},{age},{goals},{debutDate},{EscapeCsv(position)},{shirtNumber},");
+                }
             }
         }
     }
@@ -160,6 +154,12 @@ public static class JsonElementExtensions
             if (DateTime.TryParseExact(dateValue, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime result))
             {
                 return dateValue;
+            }
+
+            //O enunciado fala que o formtato esperado é yyyy-MM-dd, mas não fica claro se é apenas para a saída do CSV ou se o JSON de entrada também tem que estar nesse formato.
+            if (DateTime.TryParseExact(dateValue, "dd-MM-yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime resultBrazilFormat))
+            {
+                return resultBrazilFormat.ToString("yyyy-MM-dd");
             }
         }
         return "";
