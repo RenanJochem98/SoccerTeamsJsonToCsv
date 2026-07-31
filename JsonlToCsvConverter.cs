@@ -7,7 +7,7 @@ internal class JsonlToCsvConverter
 {
     const int BufferSize = 64 * 1024; // Buffer de 64KB para leitura
 
-    public static async Task ProcessJsonStreamAsync(string inputJsonlPath, string csvPathClubs, string csvPathPlayers, IReadOnlyList<string> championshipsFilter)
+    public static async Task ProcessJsonStreamAsync(string inputJsonlPath, string csvPathClubs, string csvPathPlayers, HashSet<string> championshipsFilter)
     {
         // 1. Configurar Streams com FileOptions.SequentialScan para o SO otimizar o I/O
         await using var inputStream = new FileStream(
@@ -64,7 +64,7 @@ internal class JsonlToCsvConverter
     }
 
     private static Utf8JsonReader ProcessAndWriteJsonObject(byte[] buffer, int bytesInBuffer, int bytesRead, JsonReaderState jsonState, 
-        StreamWriter writerClubes, StreamWriter writerJogadores, IReadOnlyList<string> championshipsFilter)
+        StreamWriter writerClubes, StreamWriter writerJogadores, HashSet<string> championshipsFilter)
     {
         var reader = new Utf8JsonReader(buffer.AsSpan(0, bytesInBuffer), isFinalBlock: bytesRead == 0, jsonState);
 
@@ -85,7 +85,7 @@ internal class JsonlToCsvConverter
     }
 
 
-    private static void ProcessAndWriteObject(JsonElement root, StreamWriter writerClubes, StreamWriter writerJogadores, IReadOnlyList<string> championshipsFilter)
+    private static void ProcessAndWriteObject(JsonElement root, StreamWriter writerClubes, StreamWriter writerJogadores, HashSet<string> championshipsFilter)
     {
         string championship = root.GetPropertyOrEmpty("championship");
 

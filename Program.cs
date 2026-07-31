@@ -35,7 +35,7 @@ try
 
     Console.WriteLine($"Utilizando valores: JsonlFilePath: \"{jsonlFilePath}\", Championships: {string.Join(", ", championships)}");
 
-    JsonlToCsvConverter.ProcessJsonStreamAsync(jsonlFilePath, clubsCsvFilePath, playersCsvFilePath, championships.ToList()).GetAwaiter().GetResult();
+    JsonlToCsvConverter.ProcessJsonStreamAsync(jsonlFilePath, clubsCsvFilePath, playersCsvFilePath, championships.ToHashSet()).GetAwaiter().GetResult();
 
     Console.WriteLine($"O arquivo clubs.csv foi gerado no caminho: {clubsCsvFilePath}");
     Console.WriteLine($"O arquivo players.csv foi gerado no caminho: {playersCsvFilePath}");
