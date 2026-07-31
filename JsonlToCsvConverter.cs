@@ -30,7 +30,13 @@ internal class JsonlToCsvConverterprivate
         int bytesInBuffer = 0;
         long totalConsumed = 0;
 
-        JsonReaderState jsonState = default;
+        JsonReaderOptions readerOptions = new JsonReaderOptions
+        {
+            AllowMultipleValues = true,
+            CommentHandling = JsonCommentHandling.Skip
+        };
+
+        JsonReaderState jsonState = new JsonReaderState(readerOptions); ;
 
         while ((bytesRead = await inputStream.ReadAsync(buffer.AsMemory(bytesInBuffer, buffer.Length - bytesInBuffer))) > 0 || bytesInBuffer > 0)
         {
@@ -63,6 +69,8 @@ internal class JsonlToCsvConverterprivate
                 Array.Copy(buffer, totalConsumed, buffer, 0, unconsumedBytes);
             }
             bytesInBuffer = unconsumedBytes;
+
+            if (bytesRead == 0) break;
         }
     }
 
@@ -75,7 +83,7 @@ internal class JsonlToCsvConverterprivate
         string clubId = root.GetPropertyOrEmpty("club_id");
         string name = root.GetPropertyOrEmpty("name");
         string championship = root.GetPropertyOrEmpty("championship");
-        string foundingDate = root.GetPropertyOrEmpty("founding_date");
+        string foundingDate = root.GetDateTimePropertyOrEmpty("founding_date");
         string city = root.GetPropertyOrEmpty("city");
         string state = root.GetPropertyOrEmpty("state");
         string country = root.GetPropertyOrEmpty("country");
@@ -97,7 +105,7 @@ internal class JsonlToCsvConverterprivate
         }
 
         // Grava a linha do Clube
-        writerClubes.WriteLine($"{clubId},{EscapeCsv(name)},{EscapeCsv(championship)},{foundingDate},{EscapeCsv(city)},{state},{EscapeCsv(country)},{EscapeCsv(stadium)},{EscapeCsv(president)},{EscapeCsv(nickname)},{EscapeCsv(colorsFormatted)},{titles}");
+        writerClubes.WriteLine($"{clubId},{EscapeCsv(name)},{EscapeCsv(championship)},{foundingDate},{EscapeCsv(city)},{state},{EscapeCsv(country)},{EscapeCsv(stadium)},{EscapeCsv(president)},{EscapeCsv(nickname)},{EscapeCsv(colorsFormatted)},{titles},");
 
         // -------------------------------------------------------------
         // 2. Extração dos Jogadores do Clube (CSV 2)
@@ -110,14 +118,14 @@ internal class JsonlToCsvConverterprivate
                 string playerName = player.GetPropertyOrEmpty("name");
                 int age = player.TryGetProperty("age", out var ageProp) ? ageProp.GetInt32() : 0;
                 int goals = player.TryGetProperty("goals", out var goalsProp) ? goalsProp.GetInt32() : 0;
-                string debutDate = player.GetPropertyOrEmpty("debut_date");
+                string debutDate = player.GetDateTimePropertyOrEmpty("debut_date");
                 string position = player.GetPropertyOrEmpty("position");
                 int shirtNumber = player.TryGetProperty("shirt_number", out var shirtProp) ? shirtProp.GetInt32() : 0;
                 string nationality = player.GetPropertyOrEmpty("nationality");
                 decimal marketValue = player.TryGetProperty("market_value", out var valProp) ? valProp.GetDecimal() : 0m;
 
                 // Grava o jogador no CSV relacionando com o club_id
-                writerJogadores.WriteLine($"{clubId},{playerId},{EscapeCsv(playerName)},{age},{goals},{debutDate},{EscapeCsv(position)},{shirtNumber},{EscapeCsv(nationality)},{marketValue}");
+                writerJogadores.WriteLine($"{clubId},{playerId},{EscapeCsv(playerName)},{age},{goals},{debutDate},{EscapeCsv(position)},{shirtNumber},{EscapeCsv(nationality)},{marketValue},");
             }
         }
     }
@@ -140,6 +148,19 @@ public static class JsonElementExtensions
         if (element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String)
         {
             return prop.GetString() ?? "";
+        }
+        return "";
+    }
+
+    public static string GetDateTimePropertyOrEmpty(this JsonElement element, string propertyName)
+    {
+        if (element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String)
+        {
+            string dateValue = prop.GetString() ?? "";
+            if (DateTime.TryParseExact(dateValue, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime result))
+            {
+                return dateValue;
+            }
         }
         return "";
     }
