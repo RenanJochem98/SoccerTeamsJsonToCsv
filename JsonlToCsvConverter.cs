@@ -76,7 +76,7 @@ internal class JsonlToCsvConverter
                 // Transforma o fragmento do objeto atual em um JsonDocument para extração rápida
                 using (var doc = JsonDocument.ParseValue(ref reader))
                 {
-                    ProcessAndWriteObject(doc.RootElement, writerClubes, writerJogadores, championshipsFilter);
+                    ProcessAndWriteClub(doc.RootElement, writerClubes, writerJogadores, championshipsFilter);
                 }
             }
         }
@@ -84,8 +84,7 @@ internal class JsonlToCsvConverter
         return reader;
     }
 
-
-    private static void ProcessAndWriteObject(JsonElement root, StreamWriter writerClubes, StreamWriter writerJogadores, HashSet<string> championshipsFilter)
+    private static void ProcessAndWriteClub(JsonElement root, StreamWriter writerClubes, StreamWriter writerJogadores, HashSet<string> championshipsFilter)
     {
         string championship = root.GetPropertyOrEmpty("championship");
 
